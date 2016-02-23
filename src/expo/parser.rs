@@ -38,7 +38,9 @@ named!(arguments <&[u8], Vec<Expression> >, many1!(
 
 named!(pub expression <&[u8], Expression>, alt!(
     chain!(
-        num: number,
+        open: opt!(char!('(')) ~
+        num: number ~
+        open: opt!(char!(')')),
         || { Expression::Literal(num) }
     ) |
     chain!(
@@ -50,8 +52,18 @@ named!(pub expression <&[u8], Expression>, alt!(
     )
 ));
 
+named!(pub line_ending, alt!(tag!("\r") | tag!("\r\n")));
+
+named!(pub expo <&[u8], Expression>,
+    chain!(
+        expo: expression ~
+        endl: line_ending,
+        || { expo }
+    )
+);
+
 pub fn parse(s: &mut String) {
-    let expr = expression(s.as_bytes());
+    let expr = expo(s.as_bytes());
     if let IResult::Done(_, output) = expr {
         println!("{:?}", output.eval());
     }
