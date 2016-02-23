@@ -7,7 +7,7 @@ named!(sign <&[u8], i64>, map!(tag!("-"), |_| -1 ));
 
 named!(integer  <&[u8], Literal>, map!(
     many1!(one_of!(b"0123456789")),
-    | vector |  Literal::Integer(vec_to_i64(vector))
+    | vector |  Literal::Integer(Int(vec_to_i64(vector)))
 ));
 
 named!(operator <&[u8], Operator>, alt!(
@@ -22,8 +22,8 @@ named!(number <&[u8], Literal>, chain!(
         int:  integer,
         || {
             match int.eval() {
-                ExpoResult::Value(num) => Literal::Integer(pref.unwrap_or(1) * num),
-                ExpoResult::Error(_) => panic!(),
+                Result::Ok(num) => Literal::Integer((Int(pref.unwrap_or(1)) * num).unwrap()),
+                Result::Err(_) => panic!(),
             }
         }
 ));
