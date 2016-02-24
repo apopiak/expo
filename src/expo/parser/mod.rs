@@ -7,30 +7,30 @@ use ast::*;
 
 named!(sign <&[u8], i64>, map!(tag!("-"), |_| -1 ));
 
-named!(integer  <&[u8], Literal>, map!(
+named!(integer  <&[u8], Lit>, map!(
     many1!(one_of!(b"0123456789")),
-    | vector |  Literal::Integer(Int(vec_to_i64(vector)))
+    | vector |  Lit::Int(Int(vec_to_i64(vector)))
 ));
 
-named!(operator <&[u8], Operator>, alt!(
-    map!(tag!("+"), |_| Operator::Plus) |
-    map!(tag!("-"), |_| Operator::Minus) |
-    map!(tag!("*"), |_| Operator::Times) |
-    map!(tag!("/"), |_| Operator::Divide)
+named!(operator <&[u8], Op>, alt!(
+    map!(tag!("+"), |_| Op::Add) |
+    map!(tag!("-"), |_| Op::Sub) |
+    map!(tag!("*"), |_| Op::Mul) |
+    map!(tag!("/"), |_| Op::Div)
 ));
 
-named!(number <&[u8], Literal>, chain!(
+named!(number <&[u8], Lit>, chain!(
         pref: opt!(sign) ~
         int:  integer,
         || {
             match int.eval() {
-                Result::Ok(num) => Literal::Integer((Int(pref.unwrap_or(1)) * num).unwrap()),
+                Result::Ok(num) => Lit::Int((Int(pref.unwrap_or(1)) * num).unwrap()),
                 Result::Err(_) => panic!(),
             }
         }
 ));
 
-named!(arguments <&[u8], Vec<Expression> >, many1!(
+named!(arguments <&[u8], Vec<Expr> >, many1!(
     chain!(
         tag!(" ") ~
         exp: expression,
@@ -41,24 +41,24 @@ named!(arguments <&[u8], Vec<Expression> >, many1!(
 named!(open_brace <&[u8], char>, char!('('));
 named!(close_brace <&[u8], char>, char!(')'));
 
-named!(expression <&[u8], Expression>, alt!(
+named!(expression <&[u8], Expr>, alt!(
     chain!(
         num: alt!(number | delimited!(open_brace, number, close_brace)),
-        || { Expression::Literal(num) }
+        || { Expr::Lit(num) }
     ) |
     delimited!(
         open_brace,
         chain!(
             op: operator ~
             args: arguments,
-            || { Expression::Call(op, args) }),
+            || { Expr::Call(op, args) }),
         close_brace
     )
 ));
 
 named!(line_ending, alt!(tag!("\r") | tag!("\r\n")));
 
-named!(pub expo <&[u8], Expression>,
+named!(pub expo <&[u8], Expr>,
     chain!(
         expo: expression ~
         endl: line_ending,
@@ -66,6 +66,6 @@ named!(pub expo <&[u8], Expression>,
     )
 );
 
-pub fn parse(s: &mut String) -> IResult<&[u8], Expression> {
+pub fn parse(s: &mut String) -> IResult<&[u8], Expr> {
     expo(s.as_bytes())
 }

@@ -5,10 +5,10 @@ use parser::parse;
 
 #[test]
 fn test_simple_parse() {
-    let expected = Expression::Call(Operator::Plus,
+    let expected = Expr::Call(Op::Add,
         vec![
-            Expression::Literal(Literal::Integer(Int(1))),
-            Expression::Literal(Literal::Integer(Int(2))),
+            Expr::Lit(Lit::Int(Int(1))),
+            Expr::Lit(Lit::Int(Int(2))),
         ]);
     let mut expo = "(+ 1 2)\r\n".to_string();
     let result = parse(&mut expo);
@@ -23,22 +23,22 @@ fn test_simple_parse() {
 
 #[test]
 fn test_parse() {
-    let expected = Expression::Call(Operator::Plus,
+    let expected = Expr::Call(Op::Add,
         vec![
-            Expression::Literal(Literal::Integer(Int(1))),
-            Expression::Call(Operator::Times,
+            Expr::Lit(Lit::Int(Int(1))),
+            Expr::Call(Op::Mul,
                 vec![
-                    Expression::Literal(Literal::Integer(Int(2))),
-                    Expression::Literal(Literal::Integer(Int(3))),
+                    Expr::Lit(Lit::Int(Int(2))),
+                    Expr::Lit(Lit::Int(Int(3))),
                 ]
             ),
-            Expression::Call(Operator::Minus,
+            Expr::Call(Op::Sub,
                 vec![
-                    Expression::Literal(Literal::Integer(Int(4))),
-                    Expression::Call(Operator::Divide,
+                    Expr::Lit(Lit::Int(Int(4))),
+                    Expr::Call(Op::Div,
                         vec![
-                            Expression::Literal(Literal::Integer(Int(5))),
-                            Expression::Literal(Literal::Integer(Int(6))),
+                            Expr::Lit(Lit::Int(Int(5))),
+                            Expr::Lit(Lit::Int(Int(6))),
                         ]
                     ),
                 ]

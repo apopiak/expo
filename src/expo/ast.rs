@@ -89,38 +89,38 @@ impl Div for Int {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum Operator {
-    Plus,
-    Times,
-    Minus,
-    Divide,
+pub enum Op {
+    Add,
+    Mul,
+    Sub,
+    Div,
 }
 
-impl Operator {
-    fn eval_op(&self, args: &Vec<Expression>) -> Result<Int, Error> {
+impl Op {
+    fn eval_op(&self, args: &Vec<Expr>) -> Result<Int, Error> {
         match *self {
-            Operator::Plus => args.iter().fold(Result::Ok(Int(0)),
-                |acc, expr: &Expression| {
+            Op::Add => args.iter().fold(Result::Ok(Int(0)),
+                |acc, expr: &Expr| {
                     acc.combine(Add::add, expr.eval())
             }),
-            Operator::Times => args.iter().fold(Result::Ok(Int(1)),
-                |acc, expr: &Expression| {
+            Op::Mul => args.iter().fold(Result::Ok(Int(1)),
+                |acc, expr: &Expr| {
                     acc.combine(Mul::mul, expr.eval())
             }),
-            Operator::Minus => {
+            Op::Sub => {
                 let mut iter = args.iter();
                 let first = iter.next().expect("first argument has to exist");
                 iter.fold(first.eval(),
-                    |acc, expr: &Expression| {
+                    |acc, expr: &Expr| {
                         acc.combine(Sub::sub, expr.eval())
                     }
                 )
             },
-            Operator::Divide => {
+            Op::Div => {
                 let mut iter = args.iter();
                 let first = iter.next().expect("first argument has to exist");
                 iter.fold(first.eval(),
-                    |acc, expr: &Expression| {
+                    |acc, expr: &Expr| {
                         acc.combine(Div::div, expr.eval())
                     }
                 )
@@ -130,29 +130,29 @@ impl Operator {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum Literal {
-    Integer(Int)
+pub enum Lit {
+    Int(Int)
 }
 
-impl Eval for Literal {
+impl Eval for Lit {
     fn eval(&self) -> Result<Int, Error> {
         match *self {
-            Literal::Integer(Int(int)) => Result::Ok(Int(int)),
+            Lit::Int(Int(int)) => Result::Ok(Int(int)),
         }
     }
 }
 
 #[derive(Debug, PartialEq)]
-pub enum Expression {
-    Literal(Literal),
-    Call(Operator, Vec<Expression>),
+pub enum Expr {
+    Lit(Lit),
+    Call(Op, Vec<Expr>),
 }
 
-impl Eval for Expression {
+impl Eval for Expr {
     fn eval(&self) -> Result<Int, Error> {
         match *self {
-            Expression::Literal(ref lit) => lit.eval(),
-            Expression::Call(ref op, ref args) => op.eval_op(args),
+            Expr::Lit(ref lit) => lit.eval(),
+            Expr::Call(ref op, ref args) => op.eval_op(args),
         }
     }
 }
