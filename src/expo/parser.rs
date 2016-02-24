@@ -36,23 +36,25 @@ named!(arguments <&[u8], Vec<Expression> >, many1!(
     )
 ));
 
-named!(pub expression <&[u8], Expression>, alt!(
+named!(open_brace <&[u8], char>, char!('('));
+named!(close_brace <&[u8], char>, char!(')'));
+
+named!(expression <&[u8], Expression>, alt!(
     chain!(
-        open: opt!(char!('(')) ~
-        num: number ~
-        open: opt!(char!(')')),
+        num: alt!(number | delimited!(open_brace, number, close_brace)),
         || { Expression::Literal(num) }
     ) |
-    chain!(
-        open: char!('(') ~
-        op: operator ~
-        args: arguments ~
-        close: char!(')'),
-        || { Expression::Call(op, args) }
+    delimited!(
+        open_brace,
+        chain!(
+            op: operator ~
+            args: arguments,
+            || { Expression::Call(op, args) }),
+        close_brace
     )
 ));
 
-named!(pub line_ending, alt!(tag!("\r") | tag!("\r\n")));
+named!(line_ending, alt!(tag!("\r") | tag!("\r\n")));
 
 named!(pub expo <&[u8], Expression>,
     chain!(
