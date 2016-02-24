@@ -1,9 +1,11 @@
 extern crate expo;
+extern crate nom;
 
 use std::io;
 use std::io::Write;
 
 use expo::parser;
+use expo::ast::Eval;
 
 fn main() {
     // Print Version and Exit Information
@@ -16,7 +18,15 @@ fn main() {
         print!("expo> ");
         io::stdout().flush().unwrap();
         match stdin.read_line(&mut input) {
-            Ok(_) => parser::parse(&mut input),
+            Ok(_) => {
+                let result = parser::parse(&mut input);
+                if let nom::IResult::Done(_, output) = result {
+                    println!("{:?}", output.eval());
+                }
+                else {
+                    println!("error while parsing: {:?}", result);
+                }
+            }
             Err(error) => println!("error {}", error),
         }
     }

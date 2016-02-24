@@ -1,6 +1,6 @@
 [package]
-name = "exp-o"
-version = "0.1.0"
+name = "expo"
+version = "0.0.1"
 authors = ["Alexander Popiak <alexander.popiak@gmail.com>"]
 
 [[bin]]
