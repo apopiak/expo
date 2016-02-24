@@ -4,6 +4,7 @@ use std::ops::Mul;
 use std::ops::Sub;
 use std::ops::Div;
 
+#[derive(PartialEq)]
 pub struct Int(pub i64);
 
 impl fmt::Debug for Int {
@@ -12,7 +13,7 @@ impl fmt::Debug for Int {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Error {
     Unknown,
     DivByZero,
@@ -22,7 +23,8 @@ pub trait Eval {
     fn eval(&self) -> Result<Int, Error>;
 }
 
-pub trait Combine<T> {
+pub trait Combine<T>
+    where Self: Sized, T: Sized {
     fn combine<F>(self: Self, fun: F, m: Self) -> Self
         where F: Fn(T, T) -> Self;
 }
@@ -87,39 +89,39 @@ impl Div for Int {
     }
 }
 
-#[derive(Debug)]
-pub enum Operator {
-    Plus,
-    Times,
-    Minus,
-    Divide,
+#[derive(Debug, PartialEq)]
+pub enum Op {
+    Add,
+    Mul,
+    Sub,
+    Div,
 }
 
-impl Operator {
-    fn eval_op(&self, args: &Vec<Expression>) -> Result<Int, Error> {
+impl Op {
+    fn eval_op(&self, args: &Vec<Expr>) -> Result<Int, Error> {
         match *self {
-            Operator::Plus => args.iter().fold(Result::Ok(Int(0)),
-                |acc, expr: &Expression| {
+            Op::Add => args.iter().fold(Result::Ok(Int(0)),
+                |acc, expr: &Expr| {
                     acc.combine(Add::add, expr.eval())
             }),
-            Operator::Times => args.iter().fold(Result::Ok(Int(1)),
-                |acc, expr: &Expression| {
+            Op::Mul => args.iter().fold(Result::Ok(Int(1)),
+                |acc, expr: &Expr| {
                     acc.combine(Mul::mul, expr.eval())
             }),
-            Operator::Minus => {
+            Op::Sub => {
                 let mut iter = args.iter();
                 let first = iter.next().expect("first argument has to exist");
                 iter.fold(first.eval(),
-                    |acc, expr: &Expression| {
+                    |acc, expr: &Expr| {
                         acc.combine(Sub::sub, expr.eval())
                     }
                 )
             },
-            Operator::Divide => {
+            Op::Div => {
                 let mut iter = args.iter();
                 let first = iter.next().expect("first argument has to exist");
                 iter.fold(first.eval(),
-                    |acc, expr: &Expression| {
+                    |acc, expr: &Expr| {
                         acc.combine(Div::div, expr.eval())
                     }
                 )
@@ -128,30 +130,30 @@ impl Operator {
     }
 }
 
-#[derive(Debug)]
-pub enum Literal {
-    Integer(Int)
+#[derive(Debug, PartialEq)]
+pub enum Lit {
+    Int(Int)
 }
 
-impl Eval for Literal {
+impl Eval for Lit {
     fn eval(&self) -> Result<Int, Error> {
         match *self {
-            Literal::Integer(Int(int)) => Result::Ok(Int(int)),
+            Lit::Int(Int(int)) => Result::Ok(Int(int)),
         }
     }
 }
 
-#[derive(Debug)]
-pub enum Expression {
-    Literal(Literal),
-    Call(Operator, Vec<Expression>),
+#[derive(Debug, PartialEq)]
+pub enum Expr {
+    Lit(Lit),
+    Call(Op, Vec<Expr>),
 }
 
-impl Eval for Expression {
+impl Eval for Expr {
     fn eval(&self) -> Result<Int, Error> {
         match *self {
-            Expression::Literal(ref lit) => lit.eval(),
-            Expression::Call(ref op, ref args) => op.eval_op(args),
+            Expr::Lit(ref lit) => lit.eval(),
+            Expr::Call(ref op, ref args) => op.eval_op(args),
         }
     }
 }
