@@ -1,4 +1,6 @@
-use nom::IResult;
+#[cfg(test)] pub mod test;
+
+pub use nom::IResult;
 
 use utils::vec_to_i64;
 use ast::*;
@@ -64,12 +66,6 @@ named!(pub expo <&[u8], Expression>,
     )
 );
 
-pub fn parse(s: &mut String) {
-    let expr = expo(s.as_bytes());
-    if let IResult::Done(_, output) = expr {
-        println!("{:?}", output.eval());
-    }
-    else {
-        println!("error while parsing: {:?}", expr);
-    }
+pub fn parse(s: &mut String) -> IResult<&[u8], Expression> {
+    expo(s.as_bytes())
 }

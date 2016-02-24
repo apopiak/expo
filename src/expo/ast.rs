@@ -4,6 +4,7 @@ use std::ops::Mul;
 use std::ops::Sub;
 use std::ops::Div;
 
+#[derive(PartialEq)]
 pub struct Int(pub i64);
 
 impl fmt::Debug for Int {
@@ -12,7 +13,7 @@ impl fmt::Debug for Int {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Error {
     Unknown,
     DivByZero,
@@ -87,7 +88,7 @@ impl Div for Int {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Operator {
     Plus,
     Times,
@@ -128,7 +129,7 @@ impl Operator {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Literal {
     Integer(Int)
 }
@@ -141,7 +142,7 @@ impl Eval for Literal {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Expression {
     Literal(Literal),
     Call(Operator, Vec<Expression>),
