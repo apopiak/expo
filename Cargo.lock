@@ -1,6 +1,6 @@
 [root]
-name = "exp-o"
-version = "0.1.0"
+name = "expo"
+version = "0.0.1"
 dependencies = [
  "nom 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "verex 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
