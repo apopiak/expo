@@ -23,7 +23,8 @@ pub trait Eval {
     fn eval(&self) -> Result<Int, Error>;
 }
 
-pub trait Combine<T> {
+pub trait Combine<T>
+    where Self: Sized, T: Sized {
     fn combine<F>(self: Self, fun: F, m: Self) -> Self
         where F: Fn(T, T) -> Self;
 }
